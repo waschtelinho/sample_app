@@ -52,6 +52,34 @@ describe UsersController do
         response.should have_selector("a", :href => "/users?page=2",
                                       :content => "Next")
       end
+      
+      describe "as a non-admin user" do
+        it "should not have delete links" do
+          test_sign_in(@user)
+          get :index
+          response.should_not have_selector("a", :href => "/users/2",
+                                        :content => "delete")
+        end
+      end
+
+      describe "as an admin user" do
+        before(:each) do
+          @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+          test_sign_in(@admin)
+          get :index
+        end
+        
+        it "should have delete links" do
+          response.should have_selector("a", :href => "/users/2",
+                                        :content => "delete")
+        end
+        
+        it "should not have delete link for his own" do
+          href = "/users/" + @admin.id.to_s
+          response.should_not have_selector("a", :href => href,
+                                        :content => "delete")
+        end
+      end
     end
   end
 
@@ -85,7 +113,6 @@ describe UsersController do
       get :new
       response.should have_selector("input[name='user[password_confirmation]'][type='password']")
     end
-
   end
 
   describe "GET 'show'" do
@@ -282,6 +309,44 @@ describe UsersController do
       it "should require matching users for 'update'" do
         put :update, :id => @user, :user => {}
         response.should redirect_to(root_path)
+      end
+    end
+  end
+  
+  describe "authentication of new/create pages" do
+
+    before(:each) do
+      @attr = { :name => "New User", :email => "user@example.com",
+                :password => "foobar", :password_confirmation => "foobar" }
+    end
+
+    describe "for signed-in users" do
+      
+      before(:each) do
+        user = Factory(:user, :email => "user@example.net")
+        test_sign_in(user)
+      end
+      
+      it "should deny access to 'new'" do
+        get :new
+        response.should redirect_to(root_path)
+      end
+
+      it "should deny access to 'create'" do
+        post :create, :user => @attr
+        response.should redirect_to(root_path)
+      end
+    end
+
+    describe "for not-signed-in users" do
+      it "should allow access to 'new'" do
+        get :new
+        response.should be_success
+      end
+      
+      it "should allow access to 'create'" do
+        post :create, :user => @attr
+        response.should redirect_to(user_path(assigns(:user)))
       end
     end
   end
