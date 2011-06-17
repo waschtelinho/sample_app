@@ -63,6 +63,8 @@ GEM
       activesupport (= 3.0.6)
       bundler (~> 1.0)
       railties (= 3.0.6)
+    rails-footnotes (3.7.4)
+      rails (>= 3.0.0)
     railties (3.0.6)
       actionpack (= 3.0.6)
       activesupport (= 3.0.6)
@@ -104,6 +106,7 @@ DEPENDENCIES
   gravatar_image_tag (= 1.0.0.pre2)
   haml
   rails (= 3.0.6)
+  rails-footnotes (>= 3.7)
   rspec (= 2.5.0)
   rspec-rails (= 2.5.0)
   spork
