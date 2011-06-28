@@ -52,13 +52,13 @@ describe UsersController do
         response.should have_selector("a", :href => "/users?page=2",
                                       :content => "Next")
       end
-      
+
       describe "as a non-admin user" do
         it "should not have delete links" do
           test_sign_in(@user)
           get :index
           response.should_not have_selector("a", :href => "/users/2",
-                                        :content => "delete")
+                                            :content => "delete")
         end
       end
 
@@ -68,16 +68,16 @@ describe UsersController do
           test_sign_in(@admin)
           get :index
         end
-        
+
         it "should have delete links" do
           response.should have_selector("a", :href => "/users/2",
                                         :content => "delete")
         end
-        
+
         it "should not have delete link for his own" do
           href = "/users/" + @admin.id.to_s
           response.should_not have_selector("a", :href => href,
-                                        :content => "delete")
+                                            :content => "delete")
         end
       end
     end
@@ -143,6 +143,14 @@ describe UsersController do
     it "should have a profile image" do
       get :show, :id => @user
       response.should have_selector("h1>img", :class => "gravatar")
+    end
+
+    it "should show the user's microposts" do
+      mp1 = Factory(:micropost, :user => @user, :content => "Foo bar")
+      mp2 = Factory(:micropost, :user => @user, :content => "Baz quux")
+      get :show, :id => @user
+      response.should have_selector("span.content", :content => mp1.content)
+      response.should have_selector("span.content", :content => mp2.content)
     end
   end
 
@@ -312,7 +320,7 @@ describe UsersController do
       end
     end
   end
-  
+
   describe "authentication of new/create pages" do
 
     before(:each) do
@@ -321,12 +329,12 @@ describe UsersController do
     end
 
     describe "for signed-in users" do
-      
+
       before(:each) do
         user = Factory(:user, :email => "user@example.net")
         test_sign_in(user)
       end
-      
+
       it "should deny access to 'new'" do
         get :new
         response.should redirect_to(root_path)
@@ -343,7 +351,7 @@ describe UsersController do
         get :new
         response.should be_success
       end
-      
+
       it "should allow access to 'create'" do
         post :create, :user => @attr
         response.should redirect_to(user_path(assigns(:user)))
